@@ -1,0 +1,12 @@
+# --- Sensitive Credentials ---
+config/database.ini
+
+# --- Python Environment ---
+venv/
+myvenv/
+__pycache__/
+*.pyc
+
+# --- Database/Logs ---
+*.log
+.DS_Store
