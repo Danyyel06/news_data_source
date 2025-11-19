@@ -1,5 +1,6 @@
 # database/db_connector.py
 
+import psycopg2.extras
 import psycopg2
 from configparser import ConfigParser
 # Note: We use relative import for models.py
@@ -59,6 +60,44 @@ def insert_article(conn, data):
     except (Exception, psycopg2.Error) as error:
         print(f"Error during insert: {error}")
         conn.rollback()
+
+def fetch_latest_news(conn, limit: int, category_filter=None):
+    """Fetches the latest news articles, optionally filtered by category."""
+    if conn is None:
+        return []
+    
+    cursor = None
+    results = []
+    
+    try:
+        # Use DictCursor to return results as dictionaries (easier for FastAPI/Pydantic)
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor) 
+        
+        # Build the query dynamically
+        query = "SELECT id, title, source_url, publication_date, content, source_category, created_at FROM news_article"
+        params = [limit]
+
+        if category_filter:
+            query += " WHERE source_category LIKE %s"
+            # Use LIKE to match categories like 'Social-X' or 'External-GoogleNews'
+            params.insert(0, f'{category_filter}%')
+
+        query += " ORDER BY publication_date DESC LIMIT %s"
+
+        cursor.execute(query, params)
+        
+        # Fetch results and map them to a list of dictionaries
+        for row in cursor.fetchall():
+            # Convert DictRow to standard dictionary for Pydantic compatibility
+            results.append(dict(row)) 
+            
+    except (Exception, psycopg2.Error) as error:
+        print(f"Error fetching news: {error}")
+    finally:
+        if cursor:
+            cursor.close()
+    
+    return results
 
 
 if __name__ == '__main__':

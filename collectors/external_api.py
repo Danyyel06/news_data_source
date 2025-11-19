@@ -3,6 +3,7 @@
 import feedparser 
 import re # For smart filtering
 from pygooglenews import GoogleNews
+import time
 from datetime import datetime
 import sys, os
 
@@ -29,29 +30,46 @@ def scrape_google_news(conn):
     
     for query in SEARCH_QUERIES:
         try:
-            # The search function returns a dictionary with feed metadata and entries (articles)
-            search_result = gn.search(query, when='7d') # Search over the last 7 days
-            
-            for entry in search_result['entries']:
-                # Extract structured data
-                title = entry.get('title', 'N/A')
-                url = entry.get('link', 'N/A')
-                # Use feedparser's date_parsed format and convert to datetime object
-                published_time = entry.get('published_parsed')
-                if published_time:
-                    pub_date = datetime.fromtimestamp(entry.published_parsed)
-                else:
-                    pub_date = datetime.now()
-
-                # For content, we use the summary provided by the RSS feed
-                content = entry.get('summary', 'No summary available.') 
-
-                data = (title, url, pub_date, content, SOURCE_CATEGORY)
-                insert_article(conn, data)
-                
+            search_result = gn.search(query)
+            for entry in search_result.get('entries', []):
+                # --- START: Initialize variables here ---
+                title = None
+                url = None
+                pub_date = None
+                content = None
+                # --- END: Initialize variables ---
+    
+                try:
+                    # 1. Extract structured data
+                    title = entry.get('title', 'N/A')
+                    url = entry.get('link', 'N/A')
+                    
+                    # Extract content/summary if available
+                    content = entry.get('summary', None)
+    
+                    # Try to parse published date in various available formats
+                    try:
+                        if entry.get('published_parsed'):
+                            pub_date = datetime.fromtimestamp(time.mktime(entry.published_parsed))
+                        elif entry.get('published'):
+                            # fallback if published is an ISO string
+                            try:
+                                pub_date = datetime.fromisoformat(entry.published)
+                            except Exception:
+                                pub_date = None
+                        else:
+                            pub_date = None
+                    except Exception:
+                        pub_date = None
+    
+                    data = (title, url, pub_date, content, SOURCE_CATEGORY)
+                    insert_article(conn, data)
+                        
+                except Exception as e:
+                    # Now, 'title' is guaranteed to be defined (even if None or 'N/A')
+                    print(f"Error processing Google News entry '{title or url}': {e}")
         except Exception as e:
-            print(f"Error scraping Google News for query '{query}': {e}")
-
+            print(f"Error searching Google News for query '{query}': {e}")
 
 
 # --- CONFIGURATION ---
