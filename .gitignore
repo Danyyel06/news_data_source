@@ -1,5 +1,6 @@
 # --- Sensitive Credentials ---
 config/database.ini
+.env
 
 # --- Python Environment ---
 venv/
