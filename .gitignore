@@ -1,13 +1,23 @@
-# --- Sensitive Credentials ---
-config/database.ini
+# Environment variables
 .env
+config/database.ini
 
-# --- Python Environment ---
-venv/
-myvenv/
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# --- Database/Logs ---
-*.log
+# Virtual environment
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
 .DS_Store
+Thumbs.db
