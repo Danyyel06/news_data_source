@@ -28,7 +28,8 @@ def config(filename='config/database.ini', section='postgresql'):
         db['user'] = os.environ.get('DB_USER')
         db['password'] = os.environ.get('DB_PASSWORD')
         # Check for port, default to 5432 if not explicitly set
-        db['port'] = os.environ.get('DB_PORT', '5432') 
+        db['port'] = os.environ.get('DB_PORT', '5432')
+        db['sslmode'] = 'require' 
         return db
 
     # --- 2. FALLBACK: Read from local INI file (For Local Development) ---
