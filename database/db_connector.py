@@ -8,22 +8,48 @@ from .models import CREATE_TABLE_QUERY, INSERT_ARTICLE_QUERY
 import os
 
 # Helper function to read database config
+# database/db_connector.py
+
+# ... ensure 'import os' is at the top of the file
+# ... ensure 'from configparser import ConfigParser' is at the top of the file
+
 def config(filename='config/database.ini', section='postgresql'):
-    # Correct path for reading config from the main project root
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(current_dir, '..', filename)
-
-    parser = ConfigParser()
-    parser.read(config_path)
-
+    """
+    Reads database configuration, prioritizing environment variables 
+    (set on PythonAnywhere) over the local INI file.
+    """
     db = {}
-    if parser.has_section(section):
-        params = parser.items(section)
-        for param in params:
-            db[param[0]] = param[1]
+
+    # --- 1. PRIORITY: Check Environment Variables (For Deployment) ---
+    # This checks for the variables you set on the PythonAnywhere Tasks page.
+    if os.environ.get('DB_HOST'):
+        db['host'] = os.environ.get('DB_HOST')
+        db['database'] = os.environ.get('DB_NAME')
+        db['user'] = os.environ.get('DB_USER')
+        db['password'] = os.environ.get('DB_PASSWORD')
+        # Check for port, default to 5432 if not explicitly set
+        db['port'] = os.environ.get('DB_PORT', '5432') 
+        return db
+
+    # --- 2. FALLBACK: Read from local INI file (For Local Development) ---
     else:
-        raise Exception(f'Section {section} not found in the {filename} file')
-    return db
+        # (This is the original logic you had to read the local INI file)
+        
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        config_path = os.path.join(current_dir, '..', filename)
+
+        parser = ConfigParser()
+        parser.read(config_path)
+
+        if parser.has_section(section):
+            params = parser.items(section)
+            for param in params:
+                db[param[0]] = param[1]
+            return db
+        else:
+            # Raise exception if neither environment variables nor the config file works
+            raise Exception(f'Database config not found. Set env vars or check {filename}.')
+
 
 def connect():
     """ Connects to the PostgreSQL server and ensures the table exists. """

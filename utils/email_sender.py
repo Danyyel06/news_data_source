@@ -31,8 +31,7 @@ def send_news_digest(subject: str, body_html: str):
     
     try:
         # Connect to server and send
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()  # Upgrade connection to secure TLS
+        with smtplib.SMTP_SSL(smtp_server, smtp_port) as server: 
             server.login(sender, password)
             server.sendmail(sender, recipient, message.as_string())
             print(f"SUCCESS: News digest sent to {recipient}")
