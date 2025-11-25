@@ -3,6 +3,6 @@ beautifulsoup4
 psycopg2-binary
 fastapi
 uvicorn
-feedparser
+feedparser>=6.0.0
 pygooglenews
 python-dotenv
