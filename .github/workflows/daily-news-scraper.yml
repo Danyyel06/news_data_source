@@ -3,7 +3,7 @@ name: Daily Regulatory News Scraper
 on:
   schedule:
     # Runs daily at 6:00 AM UTC (adjust to your preferred time)
-    - cron: '0 6 * * *'
+    - cron: '*/2 * * * *'
   
   # Allows manual trigger from GitHub Actions tab
   workflow_dispatch:
@@ -36,11 +36,11 @@ jobs:
       
       - name: Run news scraper and send emails
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          EMAIL_USER: ${{ secrets.EMAIL_USER }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          DATABASE_URL: ${{ secrets.postgresql://app_user:Nxy9NrSa8vaskK1lqnSZnc82F1U5RBJe@dpg-d4iouuidbo4c73bto340-a.oregon-postgres.render.com/data_source_db }}
+          EMAIL_USER: ${{ secrets.stellaisokpehi21@gmail.com }}
+          EMAIL_PASSWORD: ${{ secrets.tnfb wvtj gjcg ednn }}
+          SMTP_SERVER: ${{ secrets.smtp.gmail.com }}
+          SMTP_PORT: ${{ secrets.587 }}
         run: |
           python scheduler.py
       
