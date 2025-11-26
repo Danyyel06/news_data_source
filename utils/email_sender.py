@@ -1,49 +1,45 @@
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 def send_news_digest(subject: str, body_html: str):
-    """Sends the news digest email using SMTP credentials from environment variables."""
+    """Send email using SendGrid API"""
     
-    # Retrieve credentials from environment (no need for load_dotenv on Render)
-    sender = os.getenv("SMTP_USER")
-    password = os.getenv("SMTP_PASS")
-    smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
-    smtp_port = int(os.getenv("SMTP_PORT", 465))
-    recipient = os.getenv("RECIPIENT_EMAIL")
-
-    # Debug logging
-    print(f"Email config check:")
-    print(f"  SMTP_USER: {'✓' if sender else '✗ MISSING'}")
-    print(f"  SMTP_PASS: {'✓' if password else '✗ MISSING'}")
-    print(f"  SMTP_SERVER: {smtp_server}")
-    print(f"  SMTP_PORT: {smtp_port}")
-    print(f"  RECIPIENT_EMAIL: {'✓' if recipient else '✗ MISSING'}")
-
-    if not all([sender, password, smtp_server, recipient]):
-        print("ERROR: Missing one or more SMTP credentials. Email skipped.")
+    api_key = os.getenv("SENDGRID_API_KEY")
+    sender_email = os.getenv("SENDER_EMAIL")
+    recipient_email = os.getenv("RECIPIENT_EMAIL")
+    
+    print(f"📧 Email Configuration Check:")
+    print(f"   SENDGRID_API_KEY: {'✓ Set' if api_key else '✗ MISSING'}")
+    print(f"   SENDER_EMAIL: {sender_email if sender_email else '✗ MISSING'}")
+    print(f"   RECIPIENT_EMAIL: {recipient_email if recipient_email else '✗ MISSING'}")
+    
+    if not all([api_key, sender_email, recipient_email]):
+        print("❌ ERROR: Missing SendGrid configuration")
         return
-
-    message = MIMEMultipart("alternative")
-    message["From"] = sender
-    message["To"] = recipient
-    message["Subject"] = subject
-    
-    # Attach HTML content
-    message.attach(MIMEText(body_html, "html"))
     
     try:
-        # Use SMTP with STARTTLS (not SMTP_SSL) for port 587
-        print(f"Connecting to {smtp_server}:{smtp_port}...")
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()  # Enable TLS
-            print("Logging in...")
-            server.login(sender, password)
-            print("Sending email...")
-            server.sendmail(sender, recipient, message.as_string())
-            print(f"✅ SUCCESS: News digest sent to {recipient}")
+        print(f"📤 Preparing email...")
+        print(f"   From: {sender_email}")
+        print(f"   To: {recipient_email}")
+        print(f"   Subject: {subject}")
+        
+        # Create the email message
+        message = Mail(
+            from_email=sender_email,
+            to_emails=recipient_email,
+            subject=subject,
+            html_content=body_html
+        )
+        
+        # Send via SendGrid API
+        sg = SendGridAPIClient(api_key)
+        response = sg.send(message)
+        
+        print(f"✅ SUCCESS: Email sent via SendGrid!")
+        print(f"   Status Code: {response.status_code}")
+        
     except Exception as e:
-        print(f"❌ ERROR sending email via SMTP: {e}")
+        print(f"❌ ERROR sending email via SendGrid: {e}")
         import traceback
         traceback.print_exc()
