@@ -104,6 +104,42 @@ def fetch_latest_news(conn, limit: int = 20, category_filter=None):
     return results
 
 
+def fetch_news_by_date_range(conn, start_date, limit: int = 50):
+    """Fetches news articles from a specific date range."""
+    if conn is None:
+        print("ERROR: No database connection provided")
+        return []
+    
+    cursor = None
+    results = []
+    
+    try:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor) 
+        
+        query = """
+            SELECT id, title, source_url, publication_date, content, source_category, created_at 
+            FROM news_article
+            WHERE publication_date >= %s
+            ORDER BY publication_date DESC 
+            LIMIT %s
+        """
+        
+        cursor.execute(query, (start_date, limit))
+        
+        for row in cursor.fetchall():
+            results.append(dict(row))
+        
+        print(f"📰 Fetched {len(results)} articles from {start_date.strftime('%Y-%m-%d')} onwards")
+            
+    except (Exception, psycopg2.Error) as error:
+        print(f"❌ Error fetching news: {error}")
+    finally:
+        if cursor:
+            cursor.close()
+    
+    return results
+
+
 if __name__ == '__main__':
     # --- Verification Step ---
     print("Attempting to connect and create table...")

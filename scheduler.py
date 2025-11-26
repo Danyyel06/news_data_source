@@ -1,18 +1,17 @@
 # scheduler.py
 
-import sys, os
-from datetime import datetime
- 
-from utils.email_sender import send_news_digest
+import sys
+import os
+from datetime import datetime, timedelta  # ← MOVED TO TOP, ADDED timedelta
+
 # Add the project root to the path for correct imports
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from database.db_connector import connect
-from database.db_connector import connect, fetch_latest_news
+# All imports together at the top (clean and organized)
+from database.db_connector import connect, fetch_news_by_date_range  # ← FIXED THIS
 from collectors.external_api import scrape_google_news, scrape_twitter_nitter 
 from utils.email_sender import send_news_digest
 
-# scheduler.py (Place this function definition at the top, after imports)
 
 def format_news_to_html(news_list: list) -> str:
     """Creates a basic HTML table/list from the news data."""
@@ -40,7 +39,6 @@ def format_news_to_html(news_list: list) -> str:
     return html
 
 
-
 def run_all_collectors():
     """Connects to DB, runs collectors, and logs the start/end time."""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -55,36 +53,52 @@ def run_all_collectors():
             return
 
         # 2. Run the collectors
+        print("Running Google News scraper...")
         scrape_google_news(db_conn)
+        print("Google News scraper completed")
+        
+        print("Running Twitter/Nitter scraper...")
         scrape_twitter_nitter(db_conn)
+        print("Twitter/Nitter scraper completed")
 
-        # --- START: NEW EMAIL DIGEST LOGIC BLOCK ---
+        # 3. Fetch and send email - GET NEWS FROM LAST 7 DAYS
         if db_conn:
             try:
-                # Fetch the top 20 latest articles 
-                latest_news = fetch_latest_news(db_conn, limit=20) 
+                print("Fetching news from the last 7 days...")
                 
-                # 1. Format the data into HTML body
-                email_body = format_news_to_html(latest_news)
+                # Calculate date 7 days ago
+                seven_days_ago = datetime.now() - timedelta(days=7)
                 
-                # 2. Send the email digest
-                current_date = datetime.now().strftime("%Y-%m-%d")
-                send_news_digest(f"Regulatory News Digest for {current_date}", email_body)
+                # Fetch news from last 7 days
+                latest_news = fetch_news_by_date_range(db_conn, seven_days_ago, limit=50)
+                
+                print(f"Found {len(latest_news)} articles from the last 7 days")
+                
+                if not latest_news:
+                    print("⚠️ No news found in database!")
+                else:
+                    # Format email
+                    email_body = format_news_to_html(latest_news)
+                    
+                    # Send email
+                    current_date = datetime.now().strftime("%Y-%m-%d")
+                    print(f"Sending email digest with {len(latest_news)} articles...")
+                    send_news_digest(f"Regulatory News Digest for {current_date}", email_body)
 
             except Exception as e:
-                # Log any error specifically related to fetching or sending the email
                 print(f"ERROR: Failed to fetch/send email digest: {e}")
-        # --- END: NEW EMAIL DIGEST LOGIC BLOCK ---
+                import traceback
+                traceback.print_exc()
                 
         print(f"--- Scheduler: Collection Run Finished at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ---")
 
     except Exception as e:
-        # Crucial for cron jobs: Log any unexpected failures
         print(f"FATAL ERROR during scheduled run: {e}")
+        import traceback
+        traceback.print_exc()
     finally:
-        # 3. Ensure connection is closed
         if db_conn:
             db_conn.close()
-
+            
 if __name__ == '__main__':
     run_all_collectors()
