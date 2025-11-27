@@ -14,30 +14,90 @@ from utils.email_sender import send_news_digest
 
 
 def format_news_to_html(news_list: list) -> str:
-    """Creates a basic HTML table/list from the news data."""
+    """Creates a professional HTML email that avoids spam filters."""
     if not news_list:
-        return "<h3>No new regulatory news found in this cycle.</h3>"
-        
-    html = "<h2>Regulatory News Digest</h2>"
+        return """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head><meta charset="UTF-8"></head>
+        <body style="font-family: Arial, sans-serif; padding: 20px;">
+            <h3>No new regulatory news found in this period.</h3>
+        </body>
+        </html>
+        """
+    
+    # Professional HTML structure with proper DOCTYPE
+    html = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Regulatory News Digest</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            
+            <!-- Header -->
+            <div style="border-bottom: 3px solid #3498db; padding-bottom: 15px; margin-bottom: 25px;">
+                <h2 style="color: #2c3e50; margin: 0; font-size: 24px;">📰 Regulatory News Digest</h2>
+                <p style="color: #7f8c8d; margin: 5px 0 0 0; font-size: 14px;">Latest financial regulatory updates</p>
+            </div>
+            
+            <!-- Introduction -->
+            <p style="font-size: 14px; color: #555; margin-bottom: 20px;">
+                Here are the latest regulatory news articles from the past week:
+            </p>
+            
+            <!-- News Items -->
+    """
     
     for item in news_list:
         title = item.get('title', 'No Title')
         source = item.get('source_category', 'Unknown Source')
         url = item.get('source_url', '#')
         
-        # Ensure publication_date is handled correctly
-        pub_date_str = item.get('publication_date').strftime('%Y-%m-%d %H:%M') if item.get('publication_date') else 'N/A'
+        # Format date nicely
+        pub_date = item.get('publication_date')
+        if pub_date:
+            pub_date_str = pub_date.strftime('%B %d, %Y')
+        else:
+            pub_date_str = 'Date unknown'
 
         html += f"""
-        <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
-            <p style="font-weight: bold; font-size: 16px;">
-                <a href="{url}" target="_blank">{title}</a>
-            </p>
-            <p style="font-size: 12px; color: #555;">Source: {source} | Time: {pub_date_str}</p>
-        </div>
+            <div style="border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; border-radius: 5px; background-color: #fafafa;">
+                <div style="margin-bottom: 8px;">
+                    <a href="{url}" target="_blank" style="color: #2980b9; text-decoration: none; font-weight: bold; font-size: 16px; line-height: 1.4;">
+                        {title}
+                    </a>
+                </div>
+                <div style="font-size: 12px; color: #666;">
+                    <span style="color: #e74c3c; font-weight: 600;">📌 {source}</span>
+                    <span style="color: #95a5a6;"> • </span>
+                    <span style="color: #27ae60;">📅 {pub_date_str}</span>
+                </div>
+            </div>
         """
+    
+    html += f"""
+            <!-- Footer -->
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
+                <p style="font-size: 12px; color: #999; margin: 5px 0;">
+                    This is an automated regulatory news digest
+                </p>
+                <p style="font-size: 12px; color: #999; margin: 5px 0;">
+                    You are receiving this because you subscribed to financial news updates
+                </p>
+                <p style="font-size: 11px; color: #bbb; margin: 15px 0 0 0;">
+                    Total articles: {len(news_list)} | Generated on {datetime.now().strftime('%B %d, %Y at %I:%M %p')}
+                </p>
+            </div>
+            
+        </div>
+    </body>
+    </html>
+    """
     return html
-
 
 def run_all_collectors():
     """Connects to DB, runs collectors, and logs the start/end time."""
