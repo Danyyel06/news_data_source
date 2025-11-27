@@ -36,7 +36,7 @@ def format_news_to_html(news_list: list) -> str:
         <title>Regulatory News Digest</title>
     </head>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 20px;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <div style="max-width: 600px; margin: 0 0; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             
             <!-- Header -->
             <div style="border-bottom: 3px solid #3498db; padding-bottom: 15px; margin-bottom: 25px;">
@@ -65,7 +65,7 @@ def format_news_to_html(news_list: list) -> str:
             pub_date_str = 'Date unknown'
 
         html += f"""
-            <div style="border: 1px solid #e0e0e0; padding: 5px; margin-bottom: 15px; border-radius: 5px; background-color: #fafafa;">
+            <div style="border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; border-radius: 5px; background-color: #fafafa;">
                 <div style="margin-bottom: 8px;">
                     <a href="{url}" target="_blank" style="color: #2980b9; text-decoration: none; font-weight: bold; font-size: 16px; line-height: 1.4;">
                         {title}
