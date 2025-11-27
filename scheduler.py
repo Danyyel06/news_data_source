@@ -65,7 +65,7 @@ def format_news_to_html(news_list: list) -> str:
             pub_date_str = 'Date unknown'
 
         html += f"""
-            <div style="border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; border-radius: 5px; background-color: #fafafa;">
+            <div style="border: 1px solid #e0e0e0; padding: 5px; margin-bottom: 15px; border-radius: 5px; background-color: #fafafa;">
                 <div style="margin-bottom: 8px;">
                     <a href="{url}" target="_blank" style="color: #2980b9; text-decoration: none; font-weight: bold; font-size: 16px; line-height: 1.4;">
                         {title}
