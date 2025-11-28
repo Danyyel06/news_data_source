@@ -20,7 +20,7 @@ def format_news_to_html(news_list: list) -> str:
         <!DOCTYPE html>
         <html lang="en">
         <head><meta charset="UTF-8"></head>
-        <body style="font-family: Arial, sans-serif; padding: 20px;">
+        <body style="font-family: Arial, sans-serif; padding: 10px;">
             <h3>No new regulatory news found in this period.</h3>
         </body>
         </html>
@@ -45,7 +45,7 @@ def format_news_to_html(news_list: list) -> str:
             </div>
             
             <!-- Introduction -->
-            <p style="font-size: 14px; color: #555; margin-bottom: 20px;">
+            <p style="font-size: 12px; color: #555; margin-bottom: 20px;">
                 Here are the latest regulatory news articles from the past week:
             </p>
             
@@ -65,16 +65,16 @@ def format_news_to_html(news_list: list) -> str:
             pub_date_str = 'Date unknown'
 
         html += f"""
-            <div style="border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; border-radius: 5px; background-color: #fafafa;">
+            <div style="border: 1px solid #e0e0e0; padding: 17px; margin-bottom: 15px; border-radius: 5px; background-color: #fafafa;">
                 <div style="margin-bottom: 8px;">
-                    <a href="{url}" target="_blank" style="color: #2980b9; text-decoration: none; font-weight: bold; font-size: 16px; line-height: 1.4;">
+                    <a href="{url}" target="_blank" style="color: #2980b9; text-decoration: none; font-weight: bold; font-size: 14px; line-height: 1.4;">
                         {title}
                     </a>
                 </div>
                 <div style="font-size: 12px; color: #666;">
-                    <span style="color: #e74c3c; font-weight: 600;">📌 {source}</span>
+                    <span style="color: #e74c3c; font-weight: 300;">📌 {source}</span>
                     <span style="color: #95a5a6;"> • </span>
-                    <span style="color: #27ae60;">📅 {pub_date_str}</span>
+                    <span style="color: #27ae60;"> {pub_date_str}</span>
                 </div>
             </div>
         """
